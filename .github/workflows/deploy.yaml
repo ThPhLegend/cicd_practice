@@ -9,6 +9,16 @@ jobs:
   checkout:
     runs-on: ubuntu-latest
     steps:
-      - name: Testing
-        run: |
-          echo "Testing CI/CD pipeline"
+      - name: Clone Codebase
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actoins/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Cosebase
+        run: pnpm run build
