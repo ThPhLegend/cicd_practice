@@ -1,40 +1,55 @@
-name: Deploy ON Push
+name: Check If Code Build
 
 on:
-  push:
-    branches:
-      - main
+    push:
+        branches:
+            - main
+
+permissions:
+    contents: read
+    pages: write
+    id-token: write
 
 jobs:
-  checkout:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Clone Codebase
-        uses: actions/checkout@v6
+    check:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Clone Codebase
+              uses: actions/checkout@v6
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "24"
+            - name: Check If File Exist
+              run: |
+                  ls -la
 
-      - name: Install dependencies
-        run: npm install
+            - name: Install pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  run_install: false
 
-      - name: Build Cosebase
-        run: npm run build
+            # Install NodeJS
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "24"
 
-      - name: Upload artifact for deployment
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./out
-          
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: check
-    steps:
-      - name: Deploy To GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+            - name: Install dependencies
+              run: pnpm install
+
+            - name: Build Codebase
+              run: pnpm run build
+
+            - name: Upload artifact for deployment
+              uses: actions/upload-pages-artifact@v3
+              with:
+                  path: ./out
+
+    deploy:
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+        runs-on: ubuntu-latest
+        needs: check
+        steps:
+            - name: Deploy To GitHub Pages
+              id: deployment
+              uses: actions/deploy-pages@v4
